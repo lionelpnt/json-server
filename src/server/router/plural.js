@@ -263,10 +263,19 @@ module.exports = (db, name, opts) => {
         .value()
       resource = { ...req.body, id }
     } else {
-      resource = db
-        .get(name)
-        .insert(req.body)
-        .value()
+      if(Array.isArray(req.body)) {
+        (req.body).forEach(function(element) {
+          resource = db
+            .get(name)
+            .insert(element)
+            .value();
+        });
+      } else {
+        resource = db
+          .get(name)
+          .insert(req.body)
+          .value();
+      }
     }
 
     res.setHeader('Access-Control-Expose-Headers', 'Location')
@@ -341,19 +350,44 @@ module.exports = (db, name, opts) => {
     next()
   }
 
+  function destroyAll(req, res, next) {
+    let resource;
+
+    if (opts._isFake) {
+      resource = db
+        .get(name)
+        .value();
+    } else {
+      resource = db
+        .get(name)
+        .remove()
+        .value();
+    }
+
+    if (resource) {
+      res.locals.data = {};
+    }
+
+    next();
+  }
+
   const w = write(db)
 
   router
     .route('/')
     .get(list)
-    .post(create, w)
+    .post(create, w);
+
+  router
+    .route('/all')
+    .delete(destroyAll);
 
   router
     .route('/:id')
     .get(show)
     .put(update, w)
     .patch(update, w)
-    .delete(destroy, w)
+    .delete(destroy, w);
 
   return router
 }

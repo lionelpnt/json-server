@@ -265,16 +265,14 @@ module.exports = (db, name, opts) => {
     } else {
       if(Array.isArray(req.body)) {
         (req.body).forEach(function(element) {
-          resource = db
-            .get(name)
+          resource = db.get(name)
             .insert(element)
-            .value();
-        });
+            .value()
+        })
       } else {
-        resource = db
-          .get(name)
+        resource = db.get(name)
           .insert(req.body)
-          .value();
+          .value()
       }
     }
 
@@ -327,7 +325,8 @@ module.exports = (db, name, opts) => {
     let resource
 
     if (opts._isFake) {
-      resource = db.get(name).value()
+      resource = db.get(name)
+        .value()
     } else {
       resource = db
         .get(name)
@@ -351,24 +350,24 @@ module.exports = (db, name, opts) => {
   }
 
   function destroyAll(req, res, next) {
-    let resource;
+    let resource
 
     if (opts._isFake) {
       resource = db
         .get(name)
-        .value();
+        .value()
     } else {
       resource = db
         .get(name)
         .remove()
-        .value();
+        .value()
     }
 
     if (resource) {
-      res.locals.data = {};
+      res.locals.data = {}
     }
 
-    next();
+    next()
   }
 
   const w = write(db)
@@ -376,18 +375,18 @@ module.exports = (db, name, opts) => {
   router
     .route('/')
     .get(list)
-    .post(create, w);
+    .post(create, w)
 
   router
     .route('/all')
-    .delete(destroyAll);
+    .delete(destroyAll)
 
   router
     .route('/:id')
     .get(show)
     .put(update, w)
     .patch(update, w)
-    .delete(destroy, w);
+    .delete(destroy, w)
 
   return router
 }
